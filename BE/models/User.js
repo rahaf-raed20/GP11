@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const User = {
   // Create new user
   async create(userData) {
-    const { fname, mname, lname, email, password, location_id, type } = userData;
+    const { fname, mname, lname, email, password, city_id, type } = userData;
     
     // Validate user type
     if (![1, 2, 3, 4].includes(type)) {
@@ -24,9 +24,9 @@ const User = {
 
         // 1. Insert into user table
         const [userResult] = await connection.query(
-            `INSERT INTO user (fname, mname, lname, email, password, location_id, refresh_token) 
+            `INSERT INTO user (fname, mname, lname, email, password, city_id, refresh_token) 
              VALUES (?, ?, ?, ?, ?, ?, NULL)`,
-            [fname, mname || null, lname, email, hashedPassword, location_id]
+            [fname, mname || null, lname, email, hashedPassword, city_id]
         );
         
         const userId = userResult.insertId;
