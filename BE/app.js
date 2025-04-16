@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
+const cityRoutes = require('./routes/cityRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes - Make sure authRoutes is properly required
 app.use('/api/auth', authRoutes);
+app.use('/api/cities', cityRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

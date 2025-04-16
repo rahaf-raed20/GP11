@@ -2,7 +2,7 @@ const User = require('../../models/User');
 
 const signup = async (req, res) => {
   try {
-    const { fname, mname, lname, email, password, location_id , type} = req.body;
+    const { fname, mname, lname, email, password, city_id , type} = req.body;
 
     // Check if user exists
     const existingUser = await User.findByEmail(email);
@@ -14,7 +14,7 @@ const signup = async (req, res) => {
 
     // Create user without generating tokens
     const userId = await User.create({
-      fname, mname, lname, email, password, location_id , type
+      fname, mname, lname, email, password, city_id , type
     });
 
     // Return success response without tokens
