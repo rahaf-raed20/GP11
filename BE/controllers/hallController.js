@@ -1,11 +1,12 @@
 const pool = require('../config/db');
 
 const hallController = {
+    // Get all halls by owner
     getHallsByOwner: async (req, res) => {
         try {
-            const userId = req.user.id; // This is the user_id from JWT
+            const userId = req.user.id;
             
-            // First get the owner record for this user
+            // First get owner record
             const [owner] = await pool.query(
                 'SELECT id FROM owner WHERE user_id = ?', 
                 [userId]
@@ -18,9 +19,30 @@ const hallController = {
                 });
             }
             
-            // Now get halls using the owner.id (not user.id)
+            // Get halls with proper day mapping
             const [halls] = await pool.query(`
-                SELECT h.*, c.name as city_name 
+                SELECT 
+                    h.*, 
+                    c.name as city_name,
+                    CASE 
+                        WHEN h.open_day = 1 THEN 'Saturday'
+                        WHEN h.open_day = 2 THEN 'Sunday'
+                        WHEN h.open_day = 3 THEN 'Monday'
+                        WHEN h.open_day = 4 THEN 'Tuesday'
+                        WHEN h.open_day = 5 THEN 'Wednesday'
+                        WHEN h.open_day = 6 THEN 'Thursday'
+                        WHEN h.open_day = 7 THEN 'Friday'
+                    END as open_day_name,
+                    CASE 
+                        WHEN h.close_day = 1 THEN 'Saturday'
+                        WHEN h.close_day = 2 THEN 'Sunday'
+                        WHEN h.close_day = 3 THEN 'Monday'
+                        WHEN h.close_day = 4 THEN 'Tuesday'
+                        WHEN h.close_day = 5 THEN 'Wednesday'
+                        WHEN h.close_day = 6 THEN 'Thursday'
+                        WHEN h.close_day = 7 THEN 'Friday'
+                        ELSE 'Always Open'
+                    END as close_day_name
                 FROM halls h
                 JOIN city c ON h.city_id = c.id
                 WHERE h.owner_id = ?
@@ -41,21 +63,46 @@ const hallController = {
         }
     },
 
+    // Create new hall with image handling
     createHall: async (req, res) => {
         try {
-            const userId = req.user.id; // This is the user_id from JWT
+            const userId = req.user.id;
             const { 
-                name, 
-                open_day, 
-                close_date, 
-                open_time, 
-                close_time, 
-                price_per_hour, 
-                city_id, 
-                capacity 
+                name,
+                open_day,
+                close_day,
+                open_time,
+                close_time,
+                price_per_hour,
+                city_id,
+                capacity,
+                image_url
             } = req.body;
 
-            // First get the owner record for this user
+            // Validate required fields
+            if (!name || !price_per_hour || !city_id) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Name, price, and city are required'
+                });
+            }
+
+            // Validate day numbers (1-7)
+            if (open_day && (open_day < 1 || open_day > 7)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Open day must be between 1 (Saturday) and 7 (Friday)'
+                });
+            }
+
+            if (close_day && (close_day < 1 || close_day > 7)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Close day must be between 1 (Saturday) and 7 (Friday)'
+                });
+            }
+
+            // Get owner record
             const [owner] = await pool.query(
                 'SELECT id FROM owner WHERE user_id = ?', 
                 [userId]
@@ -64,32 +111,63 @@ const hallController = {
             if (!owner.length) {
                 return res.status(400).json({
                     success: false,
-                    message: 'You must register as an owner first'
+                    message: 'Owner registration required'
                 });
             }
 
-            // Now create the hall with owner.id (not user.id)
+            // Insert new hall
             const [result] = await pool.query(`
                 INSERT INTO halls (
-                    name, open_day, close_date, open_time, 
-                    close_time, price_per_hour, owner_id, 
-                    city_id, capacity, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                    name,
+                    open_day,
+                    close_day,
+                    open_time,
+                    close_time,
+                    price_per_hour,
+                    owner_id,
+                    city_id,
+                    capacity,
+                    image_url,
+                    created_at,
+                    updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
             `, [
-                name, 
-                open_day || null, 
-                close_date || null, 
-                open_time || null, 
-                close_time || null, 
-                price_per_hour, 
-                owner[0].id, // Use the owner.id from the query
-                city_id, 
-                capacity || null
+                name,
+                open_day || null,
+                close_day || null,
+                open_time || null,
+                close_time || null,
+                price_per_hour,
+                owner[0].id,
+                city_id,
+                capacity || null,
+                image_url || null
             ]);
 
-            // Return the newly created hall
+            // Return the created hall with day names
             const [newHall] = await pool.query(`
-                SELECT h.*, c.name as city_name 
+                SELECT 
+                    h.*,
+                    c.name as city_name,
+                    CASE 
+                        WHEN h.open_day = 1 THEN 'Saturday'
+                        WHEN h.open_day = 2 THEN 'Sunday'
+                        WHEN h.open_day = 3 THEN 'Monday'
+                        WHEN h.open_day = 4 THEN 'Tuesday'
+                        WHEN h.open_day = 5 THEN 'Wednesday'
+                        WHEN h.open_day = 6 THEN 'Thursday'
+                        WHEN h.open_day = 7 THEN 'Friday'
+                    END as open_day_name,
+                    CASE 
+                        WHEN h.close_day = 1 THEN 'Saturday'
+                        WHEN h.close_day = 2 THEN 'Sunday'
+                        WHEN h.close_day = 3 THEN 'Monday'
+                        WHEN h.close_day = 4 THEN 'Tuesday'
+                        WHEN h.close_day = 5 THEN 'Wednesday'
+                        WHEN h.close_day = 6 THEN 'Thursday'
+                        WHEN h.close_day = 7 THEN 'Friday'
+                        ELSE 'Always Open'
+                    END as close_day_name
                 FROM halls h
                 JOIN city c ON h.city_id = c.id
                 WHERE h.id = ?

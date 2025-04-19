@@ -6,6 +6,8 @@ const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
 const cityRoutes = require('./routes/cityRoutes');
 const hallRoutes = require('./routes/hallRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -21,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/halls', hallRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
