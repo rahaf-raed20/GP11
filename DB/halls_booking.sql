@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2025 at 08:23 PM
+-- Generation Time: Apr 19, 2025 at 07:08 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -118,8 +118,7 @@ CREATE TABLE `customer` (
 --
 
 INSERT INTO `customer` (`id`, `user_id`) VALUES
-(1, 6),
-(2, 7);
+(3, 9);
 
 -- --------------------------------------------------------
 
@@ -136,30 +135,20 @@ CREATE TABLE `halls` (
   `close_time` time DEFAULT NULL,
   `price_per_hour` float DEFAULT NULL,
   `owner_id` int(11) DEFAULT NULL,
-  `location_id` int(11) DEFAULT NULL,
+  `city_id` int(11) DEFAULT NULL,
   `capacity` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `location`
+-- Dumping data for table `halls`
 --
 
-CREATE TABLE `location` (
-  `id` int(11) NOT NULL,
-  `city_id` int(11) DEFAULT NULL,
-  `location_code` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `location`
---
-
-INSERT INTO `location` (`id`, `city_id`, `location_code`) VALUES
-(1, 1, 301);
+INSERT INTO `halls` (`id`, `name`, `open_day`, `close_date`, `open_time`, `close_time`, `price_per_hour`, `owner_id`, `city_id`, `capacity`, `created_at`, `updated_at`) VALUES
+(4, 'Royal Hall', 1, NULL, '09:00:00', '23:00:00', 200, 1, 1, 150, '2025-04-19 07:49:01', '2025-04-19 07:49:01'),
+(5, 'Royal Hall', 1, NULL, '09:00:00', '23:00:00', 200, 1, 1, 150, '2025-04-19 07:50:38', '2025-04-19 07:50:38'),
+(6, 'Royal Hall', 1, NULL, '09:00:00', '23:00:00', 200, 1, 1, 150, '2025-04-19 07:53:03', '2025-04-19 07:53:03');
 
 -- --------------------------------------------------------
 
@@ -183,6 +172,13 @@ CREATE TABLE `owner` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `owner`
+--
+
+INSERT INTO `owner` (`id`, `user_id`) VALUES
+(1, 10);
 
 -- --------------------------------------------------------
 
@@ -263,16 +259,16 @@ CREATE TABLE `user` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `refresh_token` varchar(1024) DEFAULT NULL,
-  `location_id` int(11) NOT NULL
+  `city_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id`, `fname`, `mname`, `lname`, `email`, `password`, `refresh_token`, `location_id`) VALUES
-(6, 'John', 'Michael', 'Doe', 'john.doe@example.com', '$2b$10$hUQDhdZSTGwaVfme/8pve.O2xLDMxiFEbQ2/Tz4xaqLpXG7qISbjm', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwidHlwZSI6MSwiaWF0IjoxNzQzOTA0ODc1LCJleHAiOjE3NDQ1MDk2NzV9.wrT7imUc3yV3pZeD9RpPNrk661nQFBdnc-8leEzeAbk', 1),
-(7, 'Rahaf', 'Test', 'TT', 'Rahaf@gmail.com', '$2b$10$BI.whvcC9GWEq3zBeoe1gu7MzVrOWm1dr91y1GmdNm2hKIqyqlHoa', NULL, 1);
+INSERT INTO `user` (`id`, `fname`, `mname`, `lname`, `email`, `password`, `refresh_token`, `city_id`) VALUES
+(9, 'Rahaf', 'Test', 'TT', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', NULL, 1),
+(10, 'Layan', 'L', 'AA', 'Layan@gmail.com', '$2b$10$qKaF0DWZOKM9r/l45Sn13.EUo0pBkc/f..pmhP.heFUeusPswu9Ym', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsInR5cGUiOjIsImlhdCI6MTc0NTAzODM2NCwiZXhwIjoxNzQ1NjQzMTY0fQ.1r2ddYrgur2xU6GgOkLc4iqWpfPiPl3VQ6KL0-5svQ8', 1);
 
 -- --------------------------------------------------------
 
@@ -347,15 +343,7 @@ ALTER TABLE `halls`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`),
   ADD KEY `owner_id` (`owner_id`),
-  ADD KEY `location_id` (`location_id`);
-
---
--- Indexes for table `location`
---
-ALTER TABLE `location`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `id` (`id`),
-  ADD KEY `city_id` (`city_id`);
+  ADD KEY `city_hall_id` (`city_id`);
 
 --
 -- Indexes for table `login_token`
@@ -421,7 +409,7 @@ ALTER TABLE `third_party_company`
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`),
-  ADD KEY `location_id` (`location_id`);
+  ADD KEY `city_id` (`city_id`);
 
 --
 -- Indexes for table `vacation_days`
@@ -469,19 +457,13 @@ ALTER TABLE `company_booking`
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `halls`
 --
 ALTER TABLE `halls`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `location`
---
-ALTER TABLE `location`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `login_token`
@@ -493,7 +475,7 @@ ALTER TABLE `login_token`
 -- AUTO_INCREMENT for table `owner`
 --
 ALTER TABLE `owner`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `payment_cred`
@@ -529,7 +511,7 @@ ALTER TABLE `third_party_company`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `vacation_days`
@@ -578,14 +560,8 @@ ALTER TABLE `customer`
 -- Constraints for table `halls`
 --
 ALTER TABLE `halls`
-  ADD CONSTRAINT `halls_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `owner` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `halls_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `location`
---
-ALTER TABLE `location`
-  ADD CONSTRAINT `location_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `city_hall_id` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`),
+  ADD CONSTRAINT `halls_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `owner` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `login_token`
@@ -630,7 +606,7 @@ ALTER TABLE `third_party_company`
 -- Constraints for table `user`
 --
 ALTER TABLE `user`
-  ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `city_id` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`);
 
 --
 -- Constraints for table `vacation_days`
