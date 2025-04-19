@@ -186,7 +186,232 @@ const hallController = {
                 message: 'Failed to create hall'
             });
         }
-    }
+    },
+
+    
+    // Get single hall by ID (owner must own this hall)
+    getHallById: async (req, res) => {
+            try {
+                const userId = req.user.id;
+                const hallId = req.params.id;
+    
+                // Verify owner and get owner_id
+                const [owner] = await pool.query(
+                    'SELECT id FROM owner WHERE user_id = ?', 
+                    [userId]
+                );
+                
+                if (!owner.length) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Access denied. Owner record not found'
+                    });
+                }
+    
+                // Get hall with full details
+                const [hall] = await pool.query(`
+                    SELECT 
+                        h.*, 
+                        c.name as city_name,
+                        CASE 
+                            WHEN h.open_day = 1 THEN 'Saturday'
+                            WHEN h.open_day = 2 THEN 'Sunday'
+                            WHEN h.open_day = 3 THEN 'Monday'
+                            WHEN h.open_day = 4 THEN 'Tuesday'
+                            WHEN h.open_day = 5 THEN 'Wednesday'
+                            WHEN h.open_day = 6 THEN 'Thursday'
+                            WHEN h.open_day = 7 THEN 'Friday'
+                        END as open_day_name,
+                        CASE 
+                            WHEN h.close_day = 1 THEN 'Saturday'
+                            WHEN h.close_day = 2 THEN 'Sunday'
+                            WHEN h.close_day = 3 THEN 'Monday'
+                            WHEN h.close_day = 4 THEN 'Tuesday'
+                            WHEN h.close_day = 5 THEN 'Wednesday'
+                            WHEN h.close_day = 6 THEN 'Thursday'
+                            WHEN h.close_day = 7 THEN 'Friday'
+                            ELSE 'Always Open'
+                        END as close_day_name
+                    FROM halls h
+                    JOIN city c ON h.city_id = c.id
+                    WHERE h.id = ? AND h.owner_id = ?
+                `, [hallId, owner[0].id]);
+    
+                if (!hall.length) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Hall not found or access denied'
+                    });
+                }
+    
+                return res.status(200).json({
+                    success: true,
+                    data: hall[0],
+                    message: 'Hall retrieved successfully'
+                });
+    
+            } catch (error) {
+                console.error('Error fetching hall:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to retrieve hall'
+                });
+            }
+        },
+    
+    // Update hall
+    updateHall: async (req, res) => {
+            try {
+                const userId = req.user.id;
+                const hallId = req.params.id;
+                const updates = req.body;
+    
+                // Verify owner and get owner_id
+                const [owner] = await pool.query(
+                    'SELECT id FROM owner WHERE user_id = ?', 
+                    [userId]
+                );
+                
+                if (!owner.length) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Access denied. Owner record not found'
+                    });
+                }
+    
+                // Prepare update fields
+                const validFields = [
+                    'name', 'open_day', 'close_day', 'open_time', 
+                    'close_time', 'price_per_hour', 'city_id', 
+                    'capacity', 'image_url'
+                ];
+                
+                const updateFields = {};
+                const updateValues = [];
+    
+                // Validate and prepare updates
+                for (const [key, value] of Object.entries(updates)) {
+                    if (validFields.includes(key) && value !== undefined) {
+                        // Special validation for days
+                        if ((key === 'open_day' || key === 'close_day') && value !== null) {
+                            if (value < 1 || value > 7) {
+                                return res.status(400).json({
+                                    success: false,
+                                    message: `${key} must be between 1-7 or null`
+                                });
+                            }
+                        }
+                        updateFields[key] = value;
+                        updateValues.push(`${key} = ?`);
+                    }
+                }
+    
+                if (updateValues.length === 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'No valid fields to update'
+                    });
+                }
+    
+                // Execute update
+                const query = `
+                    UPDATE halls 
+                    SET ${updateValues.join(', ')}, updated_at = NOW()
+                    WHERE id = ? AND owner_id = ?
+                `;
+                
+                const params = [...Object.values(updateFields), hallId, owner[0].id];
+                
+                const [result] = await pool.query(query, params);
+    
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Hall not found or access denied'
+                    });
+                }
+    
+                // Return updated hall
+                const [updatedHall] = await pool.query(`
+                    SELECT h.*, c.name as city_name 
+                    FROM halls h
+                    JOIN city c ON h.city_id = c.id
+                    WHERE h.id = ?
+                `, [hallId]);
+    
+                return res.status(200).json({
+                    success: true,
+                    data: updatedHall[0],
+                    message: 'Hall updated successfully'
+                });
+    
+            } catch (error) {
+                console.error('Error updating hall:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to update hall'
+                });
+            }
+        },
+    
+    // Delete hall
+    deleteHall: async (req, res) => {
+            try {
+                const userId = req.user.id;
+                const hallId = req.params.id;
+    
+                // Verify owner and get owner_id
+                const [owner] = await pool.query(
+                    'SELECT id FROM owner WHERE user_id = ?', 
+                    [userId]
+                );
+                
+                if (!owner.length) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Access denied. Owner record not found'
+                    });
+                }
+    
+                // Check for existing bookings
+                const [bookings] = await pool.query(
+                    'SELECT id FROM booking WHERE halls_id = ?',
+                    [hallId]
+                );
+                
+                if (bookings.length > 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Cannot delete hall with existing bookings'
+                    });
+                }
+    
+                // Delete hall
+                const [result] = await pool.query(
+                    'DELETE FROM halls WHERE id = ? AND owner_id = ?',
+                    [hallId, owner[0].id]
+                );
+    
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Hall not found or access denied'
+                    });
+                }
+    
+                return res.status(200).json({
+                    success: true,
+                    message: 'Hall deleted successfully'
+                });
+    
+            } catch (error) {
+                console.error('Error deleting hall:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to delete hall'
+                });
+            }
+        }
 };
 
 module.exports = hallController;

@@ -6,10 +6,11 @@ const authenticateToken = require('../middleware/authMiddleware');
 // Protect all hall routes with owner authentication
 router.use(authenticateToken);
 
-// Get all halls for logged-in owner
-router.get('/my-halls', hallController.getHallsByOwner);
 
-// Create new hall
-router.post('/', hallController.createHall);
+router.get('/my-halls', hallController.getHallsByOwner);// Get all halls for logged-in owner
+router.post('/', hallController.createHall);            // Create new hall
+router.get('/:id', hallController.getHallById);         // Get single hall
+router.patch('/:id', hallController.updateHall);        // Update hall
+router.delete('/:id', hallController.deleteHall);       // Delete hall
 
 module.exports = router;
