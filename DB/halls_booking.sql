@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 19, 2025 at 07:08 AM
+-- Generation Time: Apr 19, 2025 at 02:04 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -83,7 +83,8 @@ CREATE TABLE `city` (
 --
 
 INSERT INTO `city` (`id`, `name`) VALUES
-(1, 'Nablus');
+(1, 'Nablus'),
+(2, 'Ramallah');
 
 -- --------------------------------------------------------
 
@@ -130,13 +131,14 @@ CREATE TABLE `halls` (
   `id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `open_day` int(11) DEFAULT NULL,
-  `close_date` int(11) DEFAULT NULL,
+  `close_day` int(11) DEFAULT NULL,
   `open_time` time DEFAULT NULL,
   `close_time` time DEFAULT NULL,
   `price_per_hour` float DEFAULT NULL,
   `owner_id` int(11) DEFAULT NULL,
   `city_id` int(11) DEFAULT NULL,
   `capacity` int(11) DEFAULT NULL,
+  `image_url` varchar(1024) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -145,10 +147,11 @@ CREATE TABLE `halls` (
 -- Dumping data for table `halls`
 --
 
-INSERT INTO `halls` (`id`, `name`, `open_day`, `close_date`, `open_time`, `close_time`, `price_per_hour`, `owner_id`, `city_id`, `capacity`, `created_at`, `updated_at`) VALUES
-(4, 'Royal Hall', 1, NULL, '09:00:00', '23:00:00', 200, 1, 1, 150, '2025-04-19 07:49:01', '2025-04-19 07:49:01'),
-(5, 'Royal Hall', 1, NULL, '09:00:00', '23:00:00', 200, 1, 1, 150, '2025-04-19 07:50:38', '2025-04-19 07:50:38'),
-(6, 'Royal Hall', 1, NULL, '09:00:00', '23:00:00', 200, 1, 1, 150, '2025-04-19 07:53:03', '2025-04-19 07:53:03');
+INSERT INTO `halls` (`id`, `name`, `open_day`, `close_day`, `open_time`, `close_time`, `price_per_hour`, `owner_id`, `city_id`, `capacity`, `image_url`, `created_at`, `updated_at`) VALUES
+(4, 'Updated Hall Name', 2, 5, '09:00:00', '23:00:00', 250, 1, 2, 150, 'https://example.com/new-image.jpg', '2025-04-19 07:49:01', '2025-04-19 14:57:39'),
+(5, 'Royal Hall', 1, 3, '09:00:00', '23:00:00', 200, 1, 1, 150, NULL, '2025-04-19 07:50:38', '2025-04-19 07:50:38'),
+(6, 'Royal Hall', 1, 4, '09:00:00', '23:00:00', 200, 1, 1, 150, NULL, '2025-04-19 07:53:03', '2025-04-19 07:53:03'),
+(7, 'Grand Ballroom', 1, 5, '08:00:00', '22:00:00', 150, 1, 1, 200, 'https://example.com/hall-image.jpg', '2025-04-19 11:22:42', '2025-04-19 11:22:42');
 
 -- --------------------------------------------------------
 
@@ -240,9 +243,10 @@ CREATE TABLE `third_party_company` (
   `id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `category_id` int(11) DEFAULT NULL,
-  `location_id` int(11) DEFAULT NULL,
+  `city_id` int(11) DEFAULT NULL,
   `third_party_id` int(11) DEFAULT NULL,
-  `price_per_party` float DEFAULT NULL
+  `price_per_party` float DEFAULT NULL,
+  `image_url` varchar(1024) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -259,16 +263,17 @@ CREATE TABLE `user` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `refresh_token` varchar(1024) DEFAULT NULL,
-  `city_id` int(11) NOT NULL
+  `city_id` int(11) NOT NULL,
+  `image_url` varchar(1024) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id`, `fname`, `mname`, `lname`, `email`, `password`, `refresh_token`, `city_id`) VALUES
-(9, 'Rahaf', 'Test', 'TT', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', NULL, 1),
-(10, 'Layan', 'L', 'AA', 'Layan@gmail.com', '$2b$10$qKaF0DWZOKM9r/l45Sn13.EUo0pBkc/f..pmhP.heFUeusPswu9Ym', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsInR5cGUiOjIsImlhdCI6MTc0NTAzODM2NCwiZXhwIjoxNzQ1NjQzMTY0fQ.1r2ddYrgur2xU6GgOkLc4iqWpfPiPl3VQ6KL0-5svQ8', 1);
+INSERT INTO `user` (`id`, `fname`, `mname`, `lname`, `email`, `password`, `refresh_token`, `city_id`, `image_url`) VALUES
+(9, 'Rahaf', 'Test', 'TT', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidHlwZSI6MSwiaWF0IjoxNzQ1MDYwNzAwLCJleHAiOjE3NDU2NjU1MDB9.U92WevOfsByQDbrX7-saD_YzUVC23w49Ze8v5urKHCg', 1, 'aaaaaaaaa'),
+(10, 'Layan55', 'R', 'LLL', 'Layan55@gmail.com', '$2b$10$rjWBTGPce9320xjDbLD2vuTRJtLf3Y3EqKMGuK966UF/L54p68gCK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsInR5cGUiOjIsImlhdCI6MTc0NTA2MzUxNiwiZXhwIjoxNzQ1NjY4MzE2fQ.pqpRdVNHT5uLIiBSm74OCZ5WMiEXJeFe2n189ZXZHYs', 2, 'bbbbbbbb');
 
 -- --------------------------------------------------------
 
@@ -401,7 +406,7 @@ ALTER TABLE `third_party_company`
   ADD UNIQUE KEY `id` (`id`),
   ADD KEY `third_party_id` (`third_party_id`),
   ADD KEY `category_id` (`category_id`),
-  ADD KEY `location_id` (`location_id`);
+  ADD KEY `third_party_company_ibfk_3` (`city_id`);
 
 --
 -- Indexes for table `user`
@@ -445,7 +450,7 @@ ALTER TABLE `chat_messages`
 -- AUTO_INCREMENT for table `city`
 --
 ALTER TABLE `city`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `company_booking`
@@ -463,7 +468,7 @@ ALTER TABLE `customer`
 -- AUTO_INCREMENT for table `halls`
 --
 ALTER TABLE `halls`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `login_token`
@@ -600,7 +605,7 @@ ALTER TABLE `third_party`
 ALTER TABLE `third_party_company`
   ADD CONSTRAINT `third_party_company_ibfk_1` FOREIGN KEY (`third_party_id`) REFERENCES `third_party` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `third_party_company_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `third_category` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `third_party_company_ibfk_3` FOREIGN KEY (`location_id`) REFERENCES `location` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `third_party_company_ibfk_3` FOREIGN KEY (`city_id`) REFERENCES `city` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `user`
