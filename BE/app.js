@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const cityRoutes = require('./routes/cityRoutes');
 const hallRoutes = require('./routes/hallRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const vacationRoutes = require('./routes/vacationRoutes');
 
 const errorHandler = require('./middleware/errorHandler');
 
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/halls', hallRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/vacations', vacationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
