@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 19, 2025 at 02:04 PM
+-- Generation Time: Apr 26, 2025 at 12:48 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -47,10 +47,21 @@ CREATE TABLE `booking` (
   `event_date` date DEFAULT NULL,
   `event_start_time` time DEFAULT NULL,
   `event_end_time` time DEFAULT NULL,
+  `approval` varchar(255) NOT NULL,
   `created_at` date DEFAULT NULL,
   `updated_at` date DEFAULT NULL,
   `hall_code` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `booking`
+--
+
+INSERT INTO `booking` (`id`, `customer_id`, `halls_id`, `total_hall_price`, `total_companies_price`, `event_date`, `event_start_time`, `event_end_time`, `approval`, `created_at`, `updated_at`, `hall_code`) VALUES
+(1, 3, 7, 600, NULL, '2025-06-01', '14:00:00', '18:00:00', 'approved', '2025-04-22', '2025-04-26', NULL),
+(2, 3, 7, 150, NULL, '2025-05-01', '18:00:00', '19:00:00', 'approved', '2025-04-22', NULL, NULL),
+(3, 3, 7, 500, NULL, '2025-05-02', '17:00:00', '19:00:00', 'waiting', '2025-04-22', NULL, NULL),
+(4, 3, 7, 500, NULL, '2025-05-20', '17:00:00', '19:00:00', 'waiting', '2025-04-24', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -151,7 +162,8 @@ INSERT INTO `halls` (`id`, `name`, `open_day`, `close_day`, `open_time`, `close_
 (4, 'Updated Hall Name', 2, 5, '09:00:00', '23:00:00', 250, 1, 2, 150, 'https://example.com/new-image.jpg', '2025-04-19 07:49:01', '2025-04-19 14:57:39'),
 (5, 'Royal Hall', 1, 3, '09:00:00', '23:00:00', 200, 1, 1, 150, NULL, '2025-04-19 07:50:38', '2025-04-19 07:50:38'),
 (6, 'Royal Hall', 1, 4, '09:00:00', '23:00:00', 200, 1, 1, 150, NULL, '2025-04-19 07:53:03', '2025-04-19 07:53:03'),
-(7, 'Grand Ballroom', 1, 5, '08:00:00', '22:00:00', 150, 1, 1, 200, 'https://example.com/hall-image.jpg', '2025-04-19 11:22:42', '2025-04-19 11:22:42');
+(7, 'ABCe', 2, 5, '09:00:00', '23:00:00', 250, 1, 2, 150, 'https://example.com/new-image.jpg', '2025-04-19 11:22:42', '2025-04-24 12:46:27'),
+(11, 'My hall', 1, NULL, '06:00:00', '23:00:00', 700, 1, 1, 1450, NULL, '2025-04-24 12:51:52', '2025-04-24 12:51:52');
 
 -- --------------------------------------------------------
 
@@ -181,7 +193,8 @@ CREATE TABLE `owner` (
 --
 
 INSERT INTO `owner` (`id`, `user_id`) VALUES
-(1, 10);
+(1, 10),
+(2, 11);
 
 -- --------------------------------------------------------
 
@@ -208,8 +221,17 @@ CREATE TABLE `rate` (
   `value` int(11) DEFAULT NULL,
   `feedback` varchar(255) DEFAULT NULL,
   `customer_id` int(11) DEFAULT NULL,
-  `hall_id` int(11) DEFAULT NULL
+  `hall_id` int(11) DEFAULT NULL,
+  `created_at` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `rate`
+--
+
+INSERT INTO `rate` (`id`, `value`, `feedback`, `customer_id`, `hall_id`, `created_at`) VALUES
+(1, 4, 'AAA', 3, 7, '2025-04-02'),
+(2, 5, 'bbb', 3, 7, '2025-04-26');
 
 -- --------------------------------------------------------
 
@@ -272,8 +294,9 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `fname`, `mname`, `lname`, `email`, `password`, `refresh_token`, `city_id`, `image_url`) VALUES
-(9, 'Rahaf', 'Test', 'TT', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidHlwZSI6MSwiaWF0IjoxNzQ1MDYwNzAwLCJleHAiOjE3NDU2NjU1MDB9.U92WevOfsByQDbrX7-saD_YzUVC23w49Ze8v5urKHCg', 1, 'aaaaaaaaa'),
-(10, 'Layan55', 'R', 'LLL', 'Layan55@gmail.com', '$2b$10$rjWBTGPce9320xjDbLD2vuTRJtLf3Y3EqKMGuK966UF/L54p68gCK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsInR5cGUiOjIsImlhdCI6MTc0NTA2MzUxNiwiZXhwIjoxNzQ1NjY4MzE2fQ.pqpRdVNHT5uLIiBSm74OCZ5WMiEXJeFe2n189ZXZHYs', 2, 'bbbbbbbb');
+(9, 'Rahaf', 'Test', 'TT', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidHlwZSI6MSwiaWF0IjoxNzQ1MzI0NTE4LCJleHAiOjE3NDU5MjkzMTh9.ldY009r9prvvOIBsoEqe8mIaVjsIZFTi7N22tAqnFJk', 1, 'aaaaaaaaa'),
+(10, 'Layan55', 'R', 'LLL', 'Layan55@gmail.com', '$2b$10$oo1TEWiwq6gN13HRwcuegeXhugc7dnxE1h4znyx/qu0j60Tomlyda', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsInR5cGUiOjIsImlhdCI6MTc0NTY2MzkyNSwiZXhwIjoxNzQ2MjY4NzI1fQ.Kwz084W5wAdltEbswXYDzCcz-hNZbGVQanRPorYPGY8', 2, 'bbbbbbbb'),
+(11, 'Layan', 'Test', 'B', 'Layan12@gmail.com', '$2b$10$r0ZlTlNRNSxJAKuvslnU.ewAmkXPOWUe25JtiZWs.CuhxHdWKon2K', NULL, 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -286,6 +309,16 @@ CREATE TABLE `vacation_days` (
   `date` date DEFAULT NULL,
   `Halls_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `vacation_days`
+--
+
+INSERT INTO `vacation_days` (`id`, `date`, `Halls_id`) VALUES
+(3, '2025-06-02', 7),
+(4, '2025-04-30', 6),
+(5, '2025-03-30', 7),
+(7, '2025-07-25', 11);
 
 --
 -- Indexes for dumped tables
@@ -438,7 +471,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `booking`
 --
 ALTER TABLE `booking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `chat_messages`
@@ -468,7 +501,7 @@ ALTER TABLE `customer`
 -- AUTO_INCREMENT for table `halls`
 --
 ALTER TABLE `halls`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `login_token`
@@ -480,7 +513,7 @@ ALTER TABLE `login_token`
 -- AUTO_INCREMENT for table `owner`
 --
 ALTER TABLE `owner`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `payment_cred`
@@ -492,7 +525,7 @@ ALTER TABLE `payment_cred`
 -- AUTO_INCREMENT for table `rate`
 --
 ALTER TABLE `rate`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `third_category`
@@ -516,13 +549,13 @@ ALTER TABLE `third_party_company`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `vacation_days`
 --
 ALTER TABLE `vacation_days`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
