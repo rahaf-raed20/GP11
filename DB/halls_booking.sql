@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 26, 2025 at 12:48 PM
+-- Generation Time: May 15, 2025 at 02:43 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -113,6 +113,15 @@ CREATE TABLE `company_booking` (
   `price` float DEFAULT NULL,
   `created_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `company_booking`
+--
+
+INSERT INTO `company_booking` (`id`, `company_id`, `booking_id`, `company_code`, `start_time`, `end_time`, `price`, `created_at`) VALUES
+(1, 1, 1, NULL, '14:00:00', '18:00:00', 500, NULL),
+(2, 2, 1, NULL, '13:00:00', '19:00:00', 300, NULL),
+(3, 1, 2, NULL, '18:00:00', '19:00:00', 200, NULL);
 
 -- --------------------------------------------------------
 
@@ -244,6 +253,16 @@ CREATE TABLE `third_category` (
   `type` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `third_category`
+--
+
+INSERT INTO `third_category` (`id`, `type`) VALUES
+(1, 'Catering'),
+(2, 'Decoration'),
+(3, 'Photography'),
+(4, 'Cleaning');
+
 -- --------------------------------------------------------
 
 --
@@ -254,6 +273,13 @@ CREATE TABLE `third_party` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `third_party`
+--
+
+INSERT INTO `third_party` (`id`, `user_id`) VALUES
+(1, 13);
 
 -- --------------------------------------------------------
 
@@ -268,8 +294,18 @@ CREATE TABLE `third_party_company` (
   `city_id` int(11) DEFAULT NULL,
   `third_party_id` int(11) DEFAULT NULL,
   `price_per_party` float DEFAULT NULL,
-  `image_url` varchar(1024) DEFAULT NULL
+  `image_url` varchar(1024) DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `third_party_company`
+--
+
+INSERT INTO `third_party_company` (`id`, `name`, `category_id`, `city_id`, `third_party_id`, `price_per_party`, `image_url`, `updated_at`) VALUES
+(1, 'Delicious Premium Catering', 2, 2, 1, 600, NULL, '2025-05-15 03:40:46'),
+(2, 'Elegant Decor', 2, 1, 1, 300, NULL, NULL),
+(3, 'Photo Magic', 3, 2, 1, 400, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -296,7 +332,9 @@ CREATE TABLE `user` (
 INSERT INTO `user` (`id`, `fname`, `mname`, `lname`, `email`, `password`, `refresh_token`, `city_id`, `image_url`) VALUES
 (9, 'Rahaf', 'Test', 'TT', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidHlwZSI6MSwiaWF0IjoxNzQ1MzI0NTE4LCJleHAiOjE3NDU5MjkzMTh9.ldY009r9prvvOIBsoEqe8mIaVjsIZFTi7N22tAqnFJk', 1, 'aaaaaaaaa'),
 (10, 'Layan55', 'R', 'LLL', 'Layan55@gmail.com', '$2b$10$oo1TEWiwq6gN13HRwcuegeXhugc7dnxE1h4znyx/qu0j60Tomlyda', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsInR5cGUiOjIsImlhdCI6MTc0NTY2MzkyNSwiZXhwIjoxNzQ2MjY4NzI1fQ.Kwz084W5wAdltEbswXYDzCcz-hNZbGVQanRPorYPGY8', 2, 'bbbbbbbb'),
-(11, 'Layan', 'Test', 'B', 'Layan12@gmail.com', '$2b$10$r0ZlTlNRNSxJAKuvslnU.ewAmkXPOWUe25JtiZWs.CuhxHdWKon2K', NULL, 1, NULL);
+(11, 'Layan', 'Test', 'B', 'Layan12@gmail.com', '$2b$10$r0ZlTlNRNSxJAKuvslnU.ewAmkXPOWUe25JtiZWs.CuhxHdWKon2K', NULL, 1, NULL),
+(12, 'Third', '', 'party', 'services@example.com', '$2b$10$hashedpassword', NULL, 1, NULL),
+(13, 'Third', '', 'Party', 'Third@gmail.com', '$2b$10$3EyDtLz/3hM0FtbMwb08Ru0UE0sJE8yiOareSLwB/ejhfG5Gw3Juu', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsInR5cGUiOjMsImlhdCI6MTc0NzI2OTM3NiwiZXhwIjoxNzQ3ODc0MTc2fQ.l0ElMIBOK86jc3pcGog7xnMbjk1wTqU0AAYt8Y698mY', 2, 'https://example.com/new.jpg');
 
 -- --------------------------------------------------------
 
@@ -489,7 +527,7 @@ ALTER TABLE `city`
 -- AUTO_INCREMENT for table `company_booking`
 --
 ALTER TABLE `company_booking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `customer`
@@ -531,25 +569,25 @@ ALTER TABLE `rate`
 -- AUTO_INCREMENT for table `third_category`
 --
 ALTER TABLE `third_category`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `third_party`
 --
 ALTER TABLE `third_party`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `third_party_company`
 --
 ALTER TABLE `third_party_company`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `vacation_days`

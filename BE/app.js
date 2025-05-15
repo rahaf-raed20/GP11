@@ -11,7 +11,7 @@ const vacationRoutes = require('./routes/vacationRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const rateRoutes = require('./routes/rateRoutes');
 const errorHandler = require('./middleware/errorHandler');
-
+const thirdPartyRoutes = require('./routes/thirdPartyRoutes');
 const app = express();
 
 // Middleware
@@ -20,6 +20,7 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/third-party', thirdPartyRoutes);
 
 // Routes - Make sure authRoutes is properly required
 app.use('/api/auth', authRoutes);
