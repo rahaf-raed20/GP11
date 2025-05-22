@@ -1,4 +1,5 @@
 const express = require('express');
+const thirdPartyChatController = require('../controllers/thirdPartyChatController');
 const router = express.Router();
 const {
     getProfile,
@@ -23,6 +24,10 @@ router.get('/companies/:id', authenticateToken, getCompany);
 router.patch('/companies/:id', authenticateToken, updateCompany);
 router.delete('/companies/:id', authenticateToken, deleteCompany);
 
+// Third Party Chat Routes
+router.get('/chats', thirdPartyChatController.getThreads);
+router.get('/chats/:threadId', thirdPartyChatController.getThreadMessages);
+router.post('/chats/:threadId/reply', thirdPartyChatController.sendReply);
 // Booking routes
 router.get('/companies/:id/bookings', authenticateToken, getCompanyBookings);
 
