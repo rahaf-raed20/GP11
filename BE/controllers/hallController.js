@@ -411,7 +411,90 @@ const hallController = {
                     message: 'Failed to delete hall'
                 });
             }
+        },
+
+    getHallDetails: async (req, res) => {
+        try {
+            const hallId = req.params.id;
+            
+            // Get basic hall info
+            const [hall] = await pool.query(`
+                SELECT 
+                    h.*, 
+                    c.name as city_name,
+                    (SELECT AVG(value) FROM rate WHERE hall_id = h.id) as avg_rating,
+                    (SELECT COUNT(*) FROM rate WHERE hall_id = h.id) as total_ratings
+                FROM halls h
+                JOIN city c ON h.city_id = c.id
+                WHERE h.id = ?
+            `, [hallId]);
+
+            if (!hall.length) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Hall not found'
+                });
+            }
+
+            // Get hall features
+            const [features] = await pool.query(`
+                SELECT hf.name 
+                FROM hall_feature_mappings hfm
+                JOIN hall_features hf ON hfm.feature_id = hf.id
+                WHERE hfm.hall_id = ?
+            `, [hallId]);
+
+            // Get upcoming bookings (for availability reference)
+            const [bookings] = await pool.query(`
+                SELECT event_date, event_start_time, event_end_time
+                FROM booking
+                WHERE halls_id = ? 
+                AND event_date >= CURDATE()
+                AND approval = 'approved'
+                ORDER BY event_date ASC
+                LIMIT 5
+            `, [hallId]);
+
+            // Get vacation days
+            const [vacations] = await pool.query(`
+                SELECT date 
+                FROM vacation_days
+                WHERE Halls_id = ?
+                AND date >= CURDATE()
+                ORDER BY date ASC
+            `, [hallId]);
+
+            // Get reviews
+            const [reviews] = await pool.query(`
+                SELECT r.value, r.feedback, r.created_at,
+                       CONCAT(u.fname, ' ', u.lname) as customer_name
+                FROM rate r
+                JOIN customer c ON r.customer_id = c.id
+                JOIN user u ON c.user_id = u.id
+                WHERE r.hall_id = ?
+                ORDER BY r.created_at DESC
+                LIMIT 5
+            `, [hallId]);
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    ...hall[0],
+                    features: features.map(f => f.name),
+                    upcoming_bookings: bookings,
+                    vacation_days: vacations.map(v => v.date),
+                    recent_reviews: reviews
+                }
+            });
+
+        } catch (error) {
+            console.error('Error fetching hall details:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to retrieve hall details'
+            });
         }
+    }
 };
 
 module.exports = hallController;

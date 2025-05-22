@@ -282,6 +282,60 @@ const getCompanyBookings = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to get bookings' });
     }
 };
+const getThirdPartyDetails = async (req, res) => {
+        try {
+            const companyId = req.params.id;
+            
+            // Get basic company info
+            const [company] = await pool.query(`
+                SELECT 
+                    tpc.*,
+                    tc.type as category_name,
+                    c.name as city_name
+                FROM third_party_company tpc
+                JOIN third_category tc ON tpc.category_id = tc.id
+                JOIN city c ON tpc.city_id = c.id
+                WHERE tpc.id = ?
+            `, [companyId]);
+
+            if (!company.length) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Service provider not found'
+                });
+            }
+           
+
+            // Get upcoming bookings (for availability reference)
+            const [bookings] = await pool.query(`
+                SELECT cb.start_time, cb.end_time, cb.price,
+                       b.event_date,
+                       h.name as hall_name
+                FROM company_booking cb
+                JOIN booking b ON cb.booking_id = b.id
+                JOIN halls h ON b.halls_id = h.id
+                WHERE cb.company_id = ?
+                AND b.event_date >= CURDATE()
+                ORDER BY b.event_date ASC
+                LIMIT 5
+            `, [companyId]);
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    ...company[0],
+                    upcoming_bookings: bookings
+                }
+            });
+
+        } catch (error) {
+            console.error('Error fetching third party details:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Failed to retrieve service provider details'
+            });
+        }
+    };
 
 module.exports = {
     getProfile,
@@ -291,5 +345,6 @@ module.exports = {
     getCompany,
     updateCompany,
     deleteCompany,
-    getCompanyBookings
+    getCompanyBookings,
+    getThirdPartyDetails
 };

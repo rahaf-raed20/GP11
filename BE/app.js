@@ -12,6 +12,7 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const rateRoutes = require('./routes/rateRoutes');
 const errorHandler = require('./middleware/errorHandler');
 const thirdPartyRoutes = require('./routes/thirdPartyRoutes');
+const customerRoutes = require('./routes/customerRoutes');
 const app = express();
 
 // Middleware
@@ -30,6 +31,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/vacations', vacationRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/rates', rateRoutes);
+app.use('/api/customer', customerRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

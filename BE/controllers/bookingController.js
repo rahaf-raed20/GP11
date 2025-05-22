@@ -1,6 +1,6 @@
 // controllers/bookingController.js
 const pool = require('../config/db');
-
+const { validateBookingAvailability } = require('../utils/bookingUtils');
 const bookingController = {
     // Owner creates a booking for a customer
     createBooking: async (req, res) => {
@@ -307,8 +307,166 @@ const bookingController = {
                 message: 'Failed to update booking'
             });
         }
-    }
+    },
     
+
+  createHallBooking: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { hallId, eventDate, startTime, endTime, guestCount } = req.body;
+      
+      // Validate input
+      if (!hallId || !eventDate || !startTime || !endTime) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields' 
+        });
+      }
+      
+      // Check hall capacity
+      const [hall] = await pool.query(
+        'SELECT capacity, price_per_hour FROM halls WHERE id = ?', 
+        [hallId]
+      );
+      
+      if (!hall.length) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Hall not found' 
+        });
+      }
+      
+      if (guestCount > hall[0].capacity) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Guest count exceeds hall capacity' 
+        });
+      }
+      
+      // Check availability
+      const isAvailable = await validateBookingAvailability(
+        hallId, eventDate, startTime, endTime
+      );
+      
+      if (!isAvailable) {
+        return res.status(409).json({ 
+          success: false, 
+          message: 'Time slot not available' 
+        });
+      }
+      
+      // Calculate price
+      const start = new Date(`1970-01-01T${startTime}`);
+      const end = new Date(`1970-01-01T${endTime}`);
+      const durationHours = (end - start) / (1000 * 60 * 60);
+      const totalPrice = durationHours * hall[0].price_per_hour;
+      
+      const [customer] = await pool.query(
+        'SELECT id FROM customer WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!customer.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Customer account not found'
+        });
+    }
+    const customerId = customer[0].id;
+      // Create booking
+      const [result] = await pool.query(
+        `INSERT INTO booking (
+          customer_id, halls_id, event_date, 
+          event_start_time, event_end_time, 
+          total_hall_price , approval
+        ) VALUES (?, ?, ?, ?, ?, ? , 'waiting')`,
+        [customerId, hallId, eventDate, startTime, endTime, totalPrice]
+      );
+      
+      res.status(201).json({ 
+        success: true, 
+        data: { bookingId: result.insertId, totalPrice } 
+      });
+    } catch (error) {
+      console.error('Booking error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to create booking' 
+      });
+    }
+  },
+
+  addServiceToBooking: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const bookingId = req.params.bookingId;
+      const { companyId, serviceType, startTime, endTime } = req.body;
+      const [customer] = await pool.query(
+        'SELECT id FROM customer WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!customer.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Customer account not found'
+        });
+    }
+    const customerId = customer[0].id;
+      // Verify booking ownership
+      const [booking] = await pool.query(
+        'SELECT id FROM booking WHERE id = ? AND customer_id = ?',
+        [bookingId, customerId]
+      );
+      
+      if (!booking.length) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Booking not found or access denied' 
+        });
+      }
+      
+      // Get company details
+      const [company] = await pool.query(
+        'SELECT price_per_party FROM third_party_company WHERE id = ?',
+        [companyId]
+      );
+      
+      if (!company.length) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Service provider not found' 
+        });
+      }
+      
+      // Create service booking
+      const [result] = await pool.query(
+        `INSERT INTO company_booking (
+          company_id, booking_id, start_time, end_time, price
+        ) VALUES (?, ?, ?, ?, ? )`,
+        [companyId, bookingId, startTime, endTime, company[0].price_per_party]
+      );
+      
+      // Update total companies price in main booking
+      await pool.query(
+        `UPDATE booking 
+        SET total_companies_price = COALESCE(total_companies_price, 0) + ?
+        WHERE id = ?`,
+        [company[0].price_per_party, bookingId]
+      );
+      
+      res.status(201).json({ 
+        success: true, 
+        data: { serviceBookingId: result.insertId } 
+      });
+    } catch (error) {
+      console.error('Service booking error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to add service to booking' 
+      });
+    }
+  }
 };
 
 
