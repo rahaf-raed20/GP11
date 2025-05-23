@@ -4,8 +4,19 @@ const hallChatController = {
   // Get all chat threads for a hall owner
   getThreads: async (req, res) => {
     try {
-      const hallOwnerId = req.user.id;
-      
+      const userId = req.user.id;
+        const [hallOwnerid] = await pool.query(
+        'SELECT id FROM owner WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!hallOwnerid.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Owner account not found'
+        });
+    }
+    const hallOwnerId = hallOwnerid[0].id;
       // Get all threads where the hall owner is the provider
       const [threads] = await pool.query(`
         SELECT 
@@ -39,9 +50,20 @@ const hallChatController = {
   // Get messages in a specific thread
   getThreadMessages: async (req, res) => {
     try {
-      const hallOwnerId = req.user.id;
       const threadId = req.params.threadId;
-      
+      const userId = req.user.id;
+        const [hallOwnerid] = await pool.query(
+        'SELECT id FROM owner WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!hallOwnerid.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Owner account not found'
+        });
+    }
+    const hallOwnerId = hallOwnerid[0].id;
       // Verify thread belongs to this hall owner
       const [thread] = await pool.query(`
         SELECT ct.id 
@@ -88,9 +110,21 @@ const hallChatController = {
   // Send reply as hall owner
   sendReply: async (req, res) => {
     try {
-      const hallOwnerId = req.user.id;
       const threadId = req.params.threadId;
       const { message } = req.body;
+      const userId = req.user.id;
+        const [hallOwnerid] = await pool.query(
+        'SELECT id FROM owner WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!hallOwnerid.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Owner account not found'
+        });
+    }
+    const hallOwnerId = hallOwnerid[0].id;
       
       // Verify thread belongs to this hall owner
       const [thread] = await pool.query(`

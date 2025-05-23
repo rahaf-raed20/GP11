@@ -15,7 +15,7 @@ router.patch('/:id', hallController.updateHall);        // Update hall
 router.delete('/:id', hallController.deleteHall);       // Delete hall
 
 // Hall Owner Chat Routes
-router.get('/chats', hallChatController.getThreads);
+router.get('/chats/thread', hallChatController.getThreads);
 router.get('/chats/:threadId', hallChatController.getThreadMessages);
 router.post('/chats/:threadId/reply', hallChatController.sendReply);
 module.exports = router;

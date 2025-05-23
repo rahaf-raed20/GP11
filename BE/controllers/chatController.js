@@ -1,7 +1,7 @@
 const pool = require('../config/db');
 
 const chatController = {
-  startChatThread: async (req, res) => {
+ startChatThread: async (req, res) => {
     try {
       const customerId = req.user.id;
       const { recipientType, recipientId, initialMessage } = req.body;
@@ -28,13 +28,77 @@ const chatController = {
           message: 'Using existing thread'
         });
       }
+
+      // Determine provider information based on recipient type
+      let providerId, providerType;
       
-      // Create new thread
+      if (recipientType === 'hall') {
+        // Get hall owner info
+        const [hall] = await pool.query(
+          `SELECT owner_id FROM halls WHERE id = ?`,
+          [recipientId]
+        );
+        
+        if (!hall.length) {
+          return res.status(404).json({
+            success: false,
+            message: 'Hall not found'
+          });
+        }
+        
+        // Get user_id from owner table
+        const [owner] = await pool.query(
+          `SELECT id FROM owner WHERE id = ?`,
+          [hall[0].owner_id]
+        );
+        
+        if (!owner.length) {
+          return res.status(404).json({
+            success: false,
+            message: 'Hall owner not found'
+          });
+        }
+        
+        providerId = owner[0].id;
+        providerType = 'hall_owner';
+      } 
+      else if (recipientType === 'third_party') {
+        // Get third party company info
+        const [company] = await pool.query(
+          `SELECT third_party_id FROM third_party_company WHERE id = ?`,
+          [recipientId]
+        );
+        
+        if (!company.length) {
+          return res.status(404).json({
+            success: false,
+            message: 'Third party company not found'
+          });
+        }
+        
+        // Get user_id from third_party table
+        const [thirdParty] = await pool.query(
+          `SELECT id FROM third_party WHERE id = ?`,
+          [company[0].third_party_id]
+        );
+        
+        if (!thirdParty.length) {
+          return res.status(404).json({
+            success: false,
+            message: 'Third party provider not found'
+          });
+        }
+        
+        providerId = thirdParty[0].id;
+        providerType = 'third_party';
+      }
+      
+      // Create new thread with provider information
       const [threadResult] = await pool.query(
         `INSERT INTO chat_threads 
-        (customer_id, recipient_type, recipient_id) 
-        VALUES (?, ?, ?)`,
-        [customerId, recipientType, recipientId]
+        (customer_id, recipient_type, recipient_id, provider_id, provider_type) 
+        VALUES (?, ?, ?, ?, ?)`,
+        [customerId, recipientType, recipientId, providerId, providerType]
       );
       
       // Add initial message
@@ -47,11 +111,19 @@ const chatController = {
       
       res.status(201).json({ 
         success: true, 
-        data: { threadId: threadResult.insertId } 
+        data: { 
+          threadId: threadResult.insertId,
+          providerId,
+          providerType 
+        } 
       });
     } catch (error) {
       console.error('Chat error:', error);
-      res.status(500).json({ success: false, message: 'Failed to start chat' });
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to start chat',
+        error: error.message 
+      });
     }
   },
 

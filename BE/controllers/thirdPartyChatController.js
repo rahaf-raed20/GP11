@@ -4,8 +4,19 @@ const thirdPartyChatController = {
   // Get all chat threads for a third party company
   getThreads: async (req, res) => {
     try {
-      const thirdPartyId = req.user.id;
-      
+        const userId = req.user.id;
+        const [thirdPartyid] = await pool.query(
+        'SELECT id FROM third_party WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!thirdPartyid.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Third_party account not found'
+        });
+    }
+    const thirdPartyId = thirdPartyid[0].id;
       // Get all threads where the third party is the provider
       const [threads] = await pool.query(`
         SELECT 
@@ -28,7 +39,6 @@ const thirdPartyChatController = {
         GROUP BY ct.id
         ORDER BY cm.sent_at DESC
       `, [thirdPartyId]);
-      
       res.status(200).json({ success: true, data: threads });
     } catch (error) {
       console.error('Error getting third party threads:', error);
@@ -39,9 +49,20 @@ const thirdPartyChatController = {
   // Get messages in a specific thread
   getThreadMessages: async (req, res) => {
     try {
-      const thirdPartyId = req.user.id;
       const threadId = req.params.threadId;
-      
+      const userId = req.user.id;
+        const [thirdPartyid] = await pool.query(
+        'SELECT id FROM third_party WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!thirdPartyid.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Owner account not found'
+        });
+    }
+    const thirdPartyId = thirdPartyid[0].id;
       // Verify thread belongs to this third party
       const [thread] = await pool.query(`
         SELECT ct.id 
@@ -88,10 +109,21 @@ const thirdPartyChatController = {
   // Send reply as third party
   sendReply: async (req, res) => {
     try {
-      const thirdPartyId = req.user.id;
       const threadId = req.params.threadId;
       const { message } = req.body;
-      
+      const userId = req.user.id;
+        const [thirdPartyid] = await pool.query(
+        'SELECT id FROM third_party WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!thirdPartyid.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Owner account not found'
+        });
+    }
+    const thirdPartyId = thirdPartyid[0].id;
       // Verify thread belongs to this third party
       const [thread] = await pool.query(`
         SELECT ct.id 

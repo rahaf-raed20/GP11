@@ -4,8 +4,19 @@ const customerController = {
   // Get customer's bookings with hall and companies
   getBookings: async (req, res) => {
     try {
-      const customerId = req.user.id;
-      
+      const userId = req.user.id;
+        const [customer] = await pool.query(
+        'SELECT id FROM customer WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!customer.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Customer account not found'
+        });
+    }
+    const customerId = customer[0].id;      
       // Get hall bookings
       const [hallBookings] = await pool.query(`
         SELECT 
@@ -53,10 +64,22 @@ const customerController = {
   // Update a booking (only certain fields)
   updateBooking: async (req, res) => {
     try {
-      const customerId = req.user.id;
+      const userId = req.user.id;
       const bookingId = req.params.id;
       const { event_date, event_start_time, event_end_time } = req.body;
-      
+        const [customer] = await pool.query(
+        'SELECT id FROM customer WHERE user_id = ?',
+        [userId]
+    );
+            
+    if (!customer.length) {
+        return res.status(403).json({
+            success: false,
+            message: 'Customer account not found'
+        });
+    }
+    const customerId = customer[0].id;
+
       // Verify booking belongs to customer
       const [booking] = await pool.query(
         'SELECT id FROM booking WHERE id = ? AND customer_id = ?',

@@ -1,5 +1,4 @@
 const express = require('express');
-const thirdPartyChatController = require('../controllers/thirdPartyChatController');
 const router = express.Router();
 const {
     getProfile,
@@ -9,7 +8,10 @@ const {
     getCompany,
     updateCompany,
     deleteCompany,
-    getCompanyBookings
+    getCompanyBookings,
+    getThreads,
+    getThreadMessages,
+    sendReply
 } = require('../controllers/thirdPartyController');
 const authenticateToken = require('../middleware/authMiddleware');
 
@@ -25,9 +27,9 @@ router.patch('/companies/:id', authenticateToken, updateCompany);
 router.delete('/companies/:id', authenticateToken, deleteCompany);
 
 // Third Party Chat Routes
-router.get('/chats', thirdPartyChatController.getThreads);
-router.get('/chats/:threadId', thirdPartyChatController.getThreadMessages);
-router.post('/chats/:threadId/reply', thirdPartyChatController.sendReply);
+router.get('/chats/thread',authenticateToken, getThreads);
+router.get('/chats/:threadId',authenticateToken, getThreadMessages);
+router.post('/chats/:threadId/reply',authenticateToken, sendReply);
 // Booking routes
 router.get('/companies/:id/bookings', authenticateToken, getCompanyBookings);
 
