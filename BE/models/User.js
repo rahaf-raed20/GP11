@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const pool = require('../config/db');
 const jwt = require('jsonwebtoken');
+const { generateAccessToken, generateRefreshToken } = require('../utils/token');
 
 const User = {
   // Create new user
@@ -134,7 +135,173 @@ async findByEmail(email) {
       [userId, token]
     );
     return rows.length > 0;
+  },
+
+// Get all users with their types
+async getAllUsers() {
+  const [users] = await pool.query(`
+    SELECT 
+      u.id, u.fname, u.mname, u.lname, u.email, u.password, u.city_id, u.image_url,
+      CASE
+        WHEN c.user_id IS NOT NULL THEN 1
+        WHEN o.user_id IS NOT NULL THEN 2
+        WHEN tp.user_id IS NOT NULL THEN 3
+        WHEN a.user_id IS NOT NULL THEN 4
+        ELSE 0
+      END AS type
+    FROM user u
+    LEFT JOIN customer c ON u.id = c.user_id
+    LEFT JOIN owner o ON u.id = o.user_id
+    LEFT JOIN third_party tp ON u.id = tp.user_id
+    LEFT JOIN admin a ON u.id = a.user_id
+  `);
+  return users;
+},
+
+// Get users filtered by type
+async getUsersByType(type) {
+  let joinTable, typeValue;
+  
+  switch(type) {
+    case 1: // customer
+      joinTable = 'customer';
+      typeValue = 1;
+      break;
+    case 2: // owner
+      joinTable = 'owner';
+      typeValue = 2;
+      break;
+    case 3: // third_party
+      joinTable = 'third_party';
+      typeValue = 3;
+      break;
+    case 4: // admin
+      joinTable = 'admin';
+      typeValue = 4;
+      break;
+    default:
+      throw new Error('Invalid user type');
   }
+
+  const [users] = await pool.query(`
+    SELECT 
+      u.id, u.fname, u.mname, u.lname, u.email, u.password, u.city_id, u.image_url,
+      ? AS type
+    FROM user u
+    JOIN ${joinTable} r ON u.id = r.user_id
+  `, [typeValue]);
+  
+  return users;
+},
+
+// Search users by email
+async searchByEmail(email) {
+  const [users] = await pool.query(`
+    SELECT 
+      u.id, u.fname, u.mname, u.lname, u.email, u.password, u.city_id, u.image_url,
+      CASE
+        WHEN c.user_id IS NOT NULL THEN 1
+        WHEN o.user_id IS NOT NULL THEN 2
+        WHEN tp.user_id IS NOT NULL THEN 3
+        WHEN a.user_id IS NOT NULL THEN 4
+        ELSE 0
+      END AS type
+    FROM user u
+    LEFT JOIN customer c ON u.id = c.user_id
+    LEFT JOIN owner o ON u.id = o.user_id
+    LEFT JOIN third_party tp ON u.id = tp.user_id
+    LEFT JOIN admin a ON u.id = a.user_id
+    WHERE u.email LIKE ?
+  `, [`%${email}%`]);
+  
+  return users;
+},
+
+// Update user
+async update(id, userData) {
+  const { fname, mname, lname, email, password, city_id } = userData;
+  let updates = [];
+  let params = [];
+
+  if (fname) {
+    updates.push('fname = ?');
+    params.push(fname);
+  }
+  if (mname) {
+    updates.push('mname = ?');
+    params.push(mname);
+  }
+  if (lname) {
+    updates.push('lname = ?');
+    params.push(lname);
+  }
+  if (email) {
+    updates.push('email = ?');
+    params.push(email);
+  }
+  if (password) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    updates.push('password = ?');
+    params.push(hashedPassword);
+  }
+  if (city_id) {
+    updates.push('city_id = ?');
+    params.push(city_id);
+  }
+
+  if (updates.length === 0) {
+    throw new Error('No valid fields to update');
+  }
+
+  params.push(id);
+  
+  await pool.query(
+    `UPDATE user SET ${updates.join(', ')} WHERE id = ?`,
+    params
+  );
+},
+
+// Delete user (with transaction to handle role tables)
+async delete(id) {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    // 1. Delete from role tables
+    await connection.query('DELETE FROM customer WHERE user_id = ?', [id]);
+    await connection.query('DELETE FROM owner WHERE user_id = ?', [id]);
+    await connection.query('DELETE FROM third_party WHERE user_id = ?', [id]);
+    await connection.query('DELETE FROM admin WHERE user_id = ?', [id]);
+
+    // 2. Delete from user table
+    await connection.query('DELETE FROM user WHERE id = ?', [id]);
+
+    await connection.commit();
+  } catch (error) {
+    if (connection) await connection.rollback();
+    throw error;
+  } finally {
+    if (connection) connection.release();
+  }
+},
+
+// Impersonate user (generate tokens directly)
+async impersonate(userId) {
+  const user = await this.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Determine user type
+  const userWithType = await this.findByEmail(user.email);
+  
+  return {
+    accessToken: generateAccessToken(userWithType),
+    refreshToken: generateRefreshToken(userWithType),
+    type: userWithType.type
+  };
+}
 };
 
 module.exports = User;
