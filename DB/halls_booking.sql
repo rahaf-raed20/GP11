@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 23, 2025 at 03:10 AM
+-- Generation Time: Jun 14, 2025 at 02:28 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -31,6 +31,13 @@ CREATE TABLE `admin` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`id`, `user_id`) VALUES
+(1, 15);
 
 -- --------------------------------------------------------
 
@@ -455,12 +462,13 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `fname`, `mname`, `lname`, `email`, `password`, `refresh_token`, `city_id`, `image_url`) VALUES
-(9, 'Rahaf', 'Test', 'NewLastName', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidHlwZSI6MSwiaWF0IjoxNzQ3OTYyMjc5LCJleHAiOjE3NDg1NjcwNzl9.vP2ASiILud_nGkL-mpC2ECB4ZnMerWzmXRFvVWiYYfU', 1, 'aaaaaaaaa'),
+(9, 'Rahaf', 'Test', 'NewLastName', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidHlwZSI6MSwiaWF0IjoxNzQ5ODUwMzg1LCJleHAiOjE3NTA0NTUxODV9.7JzRQNuroT-FENoHr8J-qsZiFLCB-EeLCwYNZrrojBc', 1, 'aaaaaaaaa'),
 (10, 'Layan55', 'R', 'LLL', 'Layan55@gmail.com', '$2b$10$oo1TEWiwq6gN13HRwcuegeXhugc7dnxE1h4znyx/qu0j60Tomlyda', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsInR5cGUiOjIsImlhdCI6MTc0Nzk2MDkzMSwiZXhwIjoxNzQ4NTY1NzMxfQ.HAhcu7uPLz9eK4SQddcAZ9ssyXVqHrp4Hv0JoWocV4g', 2, 'bbbbbbbb'),
 (11, 'Layan', 'Test', 'B', 'Layan12@gmail.com', '$2b$10$r0ZlTlNRNSxJAKuvslnU.ewAmkXPOWUe25JtiZWs.CuhxHdWKon2K', NULL, 1, NULL),
 (12, 'Third', '', 'party', 'services@example.com', '$2b$10$hashedpassword', NULL, 1, NULL),
 (13, 'Third', '', 'Party', 'Third@gmail.com', '$2b$10$3EyDtLz/3hM0FtbMwb08Ru0UE0sJE8yiOareSLwB/ejhfG5Gw3Juu', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsInR5cGUiOjMsImlhdCI6MTc0Nzk2MTAzNywiZXhwIjoxNzQ4NTY1ODM3fQ.DMnw0RJZylbpKqJ447XX43lyTIrAO3Yy7Tef2h5oWlA', 2, 'https://example.com/new.jpg'),
-(14, 'Customer', 'One', 'A', 'Customer@gmail.com', '$2b$10$cktYLhGo1KD/Dubgbgh2Oe1thpt59co9VkwYCmz8RlC/eZaPULvKu', NULL, 1, NULL);
+(14, 'Customer', 'One', 'A', 'Customer@gmail.com', '$2b$10$iiMMqMKM6D13019dFGA4MuXgYaDxoqsFqLktD8Tg/tGlL8gjZ9jxW', NULL, 1, NULL),
+(15, 'Admin', 'One', 'A', 'Admin@gmail.com', '$2b$10$W9Ky0kiJ7PivhLjr.JZ4TermHdAbQfshUgFNFnZ7IwCPV275hA84q', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUsInR5cGUiOjQsImlhdCI6MTc0OTg2MDEzNywiZXhwIjoxNzUwNDY0OTM3fQ.cNRlgd_HQR0PEHhrJPV8Jny7JIl4e_U0J3NLLzY-028', 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -663,7 +671,7 @@ ALTER TABLE `vacation_days`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `booking`
@@ -699,7 +707,7 @@ ALTER TABLE `company_booking`
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `halls`
@@ -777,7 +785,7 @@ ALTER TABLE `third_party_company`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `vacation_days`
