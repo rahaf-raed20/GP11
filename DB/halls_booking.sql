@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 14, 2025 at 02:28 AM
+-- Generation Time: Jun 17, 2025 at 03:03 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -297,6 +297,53 @@ CREATE TABLE `msg` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `type_id` int(11) NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `message` text NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `related_id` int(11) DEFAULT NULL COMMENT 'ID of related entity (booking_id, chat_id, etc)',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `user_id`, `type_id`, `title`, `message`, `is_read`, `related_id`, `created_at`) VALUES
+(1, 9, 1, 'Booking Confirmed', 'Your booking for ABC Hall has been confirmed', 1, 10, '2025-06-17 00:56:52'),
+(2, 9, 2, 'Booking Confirmed', 'Test', 1, 10, '2025-06-17 00:57:50');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notification_types`
+--
+
+CREATE TABLE `notification_types` (
+  `id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `description` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notification_types`
+--
+
+INSERT INTO `notification_types` (`id`, `name`, `description`) VALUES
+(1, 'booking', 'Booking-related notifications'),
+(2, 'chat', 'New chat messages'),
+(3, 'system', 'System announcements'),
+(4, 'payment', 'Payment updates');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `owner`
 --
 
@@ -462,7 +509,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `fname`, `mname`, `lname`, `email`, `password`, `refresh_token`, `city_id`, `image_url`) VALUES
-(9, 'Rahaf', 'Test', 'NewLastName', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidHlwZSI6MSwiaWF0IjoxNzQ5ODUwMzg1LCJleHAiOjE3NTA0NTUxODV9.7JzRQNuroT-FENoHr8J-qsZiFLCB-EeLCwYNZrrojBc', 1, 'aaaaaaaaa'),
+(9, 'Rahaf', 'Test', 'NewLastName', 'Rahaf@gmail.com', '$2b$10$GA1Y6vA5JMXOC3R.AfbL3epkjoil2RapJFu.Nl.l9z.LJ2mJnI0wK', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwidHlwZSI6MSwiaWF0IjoxNzUwMTIxNzQwLCJleHAiOjE3NTA3MjY1NDB9.gF0_hbAYKnnUqZ6z6a9y9UMbFKzHeKVM5IK0bXKp6Rg', 1, 'aaaaaaaaa'),
 (10, 'Layan55', 'R', 'LLL', 'Layan55@gmail.com', '$2b$10$oo1TEWiwq6gN13HRwcuegeXhugc7dnxE1h4znyx/qu0j60Tomlyda', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAsInR5cGUiOjIsImlhdCI6MTc0Nzk2MDkzMSwiZXhwIjoxNzQ4NTY1NzMxfQ.HAhcu7uPLz9eK4SQddcAZ9ssyXVqHrp4Hv0JoWocV4g', 2, 'bbbbbbbb'),
 (11, 'Layan', 'Test', 'B', 'Layan12@gmail.com', '$2b$10$r0ZlTlNRNSxJAKuvslnU.ewAmkXPOWUe25JtiZWs.CuhxHdWKon2K', NULL, 1, NULL),
 (12, 'Third', '', 'party', 'services@example.com', '$2b$10$hashedpassword', NULL, 1, NULL),
@@ -590,6 +637,21 @@ ALTER TABLE `msg`
   ADD UNIQUE KEY `id` (`id`),
   ADD KEY `sender_id` (`sender_id`),
   ADD KEY `reciver_id` (`reciver_id`);
+
+--
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `type_id` (`type_id`),
+  ADD KEY `idx_notifications_user` (`user_id`),
+  ADD KEY `idx_notifications_read` (`user_id`,`is_read`);
+
+--
+-- Indexes for table `notification_types`
+--
+ALTER TABLE `notification_types`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `owner`
@@ -740,6 +802,18 @@ ALTER TABLE `msg`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `notification_types`
+--
+ALTER TABLE `notification_types`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT for table `owner`
 --
 ALTER TABLE `owner`
@@ -842,6 +916,13 @@ ALTER TABLE `login_token`
 ALTER TABLE `msg`
   ADD CONSTRAINT `msg_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `msg_ibfk_2` FOREIGN KEY (`reciver_id`) REFERENCES `user` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
+  ADD CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`type_id`) REFERENCES `notification_types` (`id`);
 
 --
 -- Constraints for table `owner`

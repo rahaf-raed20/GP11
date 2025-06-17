@@ -15,6 +15,7 @@ const thirdPartyRoutes = require('./routes/thirdPartyRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const app = express();
 
 // Middleware
@@ -36,6 +37,7 @@ app.use('/api/rates', rateRoutes);
 app.use('/api/customer', customerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/notifications', notificationRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Service is running' });
